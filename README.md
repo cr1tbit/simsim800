@@ -9,6 +9,10 @@ SMS/calling/TCPsocket stuff. In my opinion the easiest way to send (low amounts)
 of data with SIM800 module is by GET request, with URL like this:
 http://example.com/api?payload=HERE_COMES_THE_PAYLOAD.
 
+This method has been proven to be quite strudy in my previous project.
+
+For more info I suggest checking this [link.](https://m2msupport.net/m2msupport/athttppara-set-paramaters-for-http-connection/)
+
 ## How do I
 **Implement** and then **attach** your own variants of these functions (just like in mock_main.c):
 
