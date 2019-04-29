@@ -95,7 +95,8 @@ void sim800_receive(
         1000
     );
     sim800->buffer[(sim800->buf_len)-1] = 0x00;
-    printf("buffer content after receive: \n%s\n",sim800->buffer);
+    //printf("buffer content after receive: \n%s\n",sim800->buffer);
+    printf("R:%s\n",sim800->buffer);
 }
 
 uint8_t sim800_receive_match_pattern(
@@ -147,8 +148,8 @@ uint8_t sim800_gprs_get(
     uint16_t buf_len
 ){
     sim800_query(sim800,"AT+SAPBR=3,1,\"APN\",\"internet\"","OK");
-    sim800_query(sim800,"AT+SAPBR=1,1","OK");
-    sim800_query(sim800,"AT+HTTPINIT","OK");
+    //sim800_query(sim800,"AT+SAPBR=1,1","OK");
+    //sim800_query(sim800,"AT+HTTPINIT","OK");
     sim800_command(
         sim800,
         "AT+HTTPPARA=\"URL\",\"%s\"",
@@ -158,7 +159,7 @@ uint8_t sim800_gprs_get(
     sim800_flush(sim800);
     usleep(3000000);
     sim800_query(sim800,"AT+HTTPREAD","OK");
-    printf("\n***BUFFER CONENT ***\n",sim800->buffer);
+    printf("\n***BUFFER CONENT ***\n%s\n",sim800->buffer);
     sim800_query(sim800,"AT+CIPSHUT","OK");
 }
 

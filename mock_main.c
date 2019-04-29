@@ -12,6 +12,7 @@
 #include <errno.h>   /* Error number definitions */
 #include <termios.h> /* POSIX terminal control definitions */
 
+#define GENERIC_SWEAR "screwup"
 
 
 int fail_handle(){
@@ -45,30 +46,30 @@ int test_mock_uart(sim800_t *sim){
 
 int fd;
 
+//#define MOCK_UART_DEBUG
+
 void uart_tx(char* buffer,uint16_t len, uint16_t timeout){
-    printf("TXing: %s\n",buffer);
+    //#ifdef MOCK_UART_DEBUG
+        printf("Q: %s\n",buffer);
+    //#endif
     if (write(fd, buffer, len) < len)
-        printf("possible fuckup writing to port.\n");
+        printf("possible "GENERIC_SWEAR" writing to port.\n");
 };
 void uart_rx(char* buffer,uint16_t len, uint16_t timeout){
-    printf("RXing started...\n");
+    #ifdef MOCK_UART_DEBUG
+        printf("RXing started...\n");
+    #endif
     usleep(1000000);
     int _bno = read(fd, buffer,len); 
     if (_bno <=0)
-        printf("possible fuckup reading from port.\n");
-    printf("RXed %d bytes: \n%s\n",_bno,buffer);
+        printf("possible "GENERIC_SWEAR" reading from port.\n");
+    #ifdef MOCK_UART_DEBUG
+        printf("RXed %d bytes: \n%s\n",_bno,buffer);
+    #endif
 }
 
 int test_real_uart(sim800_t *sim){
-    printf("\n\n*** REAL UART TEST ***\n");
-    fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
-    if (fd == -1){
-        printf("fucked opening port.");
-        return -1;
-    }
-    sim->handle_tx = &uart_tx;
-    sim->handle_rx = &uart_rx;
-    
+    printf("\n\n*** REAL UART TEST ***\n");    
     if (sim800_query(sim,"AT","OK") !=0x01)
         return fail_handle();
     if (sim800_query(sim,"AT","NOTOK") !=0x00)
@@ -76,30 +77,39 @@ int test_real_uart(sim800_t *sim){
     return 0;
 }
 
+void send_data(sim800_t *sim){
+    char *addr = "http://qrng.anu.edu.au/API/jsonI.php?length=1&type=uint8";
+    
+    sim800_gprs_get(
+        sim,
+        addr,
+        strlen(addr)
+    );
+}
 
 int main( int argc, const char* argv[] )
 {
-	printf( "\nRunning mock HAL thingy\n\n" );
+	printf( "\n Running mock HAL thingy\n\n" );
 
     sim800_t sim;
     sim800_init(&sim);
 
-    //if (test_mock_uart(&sim) == -1)
-    //    return -1;
-    
-    if (test_real_uart(&sim) == -1)
+    fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
+    if (fd == -1){
+        printf(GENERIC_SWEAR" opening port.");
         return -1;
+    }
+    sim.handle_tx = &uart_tx;
+    sim.handle_rx = &uart_rx;
+    int i;
 
-    printf("detected state: %d\n",sim800_get_state(&sim));
+    for (i=0;i<3;i++){
+        if (sim800_get_state(&sim) == 5){
+            printf("Valid state detected, doing the send thing...");
+            send_data(&sim);
+            break;
+        }
+    }
     //sim800_command(&sim,"AT+CSTT=\"%s\"",sim.credentials_APN);
-    usleep(300000);
-
-    char *addr = "http://qrng.anu.edu.au/API/jsonI.php?length=1&type=uint8";
-
-    sim800_gprs_get(
-        &sim,
-        addr,
-        strlen(addr)
-    );
 }
 
