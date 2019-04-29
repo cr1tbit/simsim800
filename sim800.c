@@ -3,42 +3,10 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#define RX_BUF_SIZE 128
+#include "sim800.h"
 
-typedef enum {
-    err_unknown = -1,
-    ok_off = 0,
-    err_unresponsive = 1,
-    err_no_sim = 2,
-    ok_no_net = 3,
-    ok_gsm_mode = 4,
-    ok_gprs_mode = 5
-} sim800_state_t;
 
-typedef struct {
-    sim800_state_t state;
 
-    char *credentials_APN; 
-    char *credentials_user;
-    char *credentials_passwd;
-
-    /* 
-     * these pointers must  be populated before
-     * actually using the object
-     */
-    //returns number of TXed chars
-    uint16_t (*handle_tx)(char* buffer,uint16_t buf_len, uint16_t timeout);
-    //returns number of RXed chars
-    uint16_t (*handle_rx)(char* buffer,uint16_t buf_len, uint16_t timeout);
-    uint8_t (*handle_set_gpio_led)((uint8_t state);
-    uint8_t (*handle_set_gpio_pwr)((uint8_t state);
-    uint8_t (*handle_delay_ms)(uint16_t time_ms);
-
-    //internal buffers
-    char rx_buf[RX_BUF_SIZE];
-    char tx_buf[RX_BUF_SIZE];
-    uint16_t buf_len;
-} sim800_t;
 
 /***
  * flush command should set both internal RX buffer,
