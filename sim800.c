@@ -22,15 +22,17 @@ typedef struct {
     char *credentials_user;
     char *credentials_passwd;
 
-    //these pointers must  be populated before
-    //actually using the object
-    uint16_t (*handle_tx)(char*,uint16_t, uint16_t);
-    uint16_t (*handle_rx)(char*,uint16_t, uint16_t);
-
-    //these aren't implemented yet so not really i guess
-    uint8_t (*handle_set_gpio_led)(uint8_t);
-    uint8_t (*handle_set_gpio_pwr)(uint8_t);
-    uint8_t (*handle_delay_ms)(uint16_t);
+    /* 
+     * these pointers must  be populated before
+     * actually using the object
+     */
+    //returns number of TXed chars
+    uint16_t (*handle_tx)(char* buffer,uint16_t buf_len, uint16_t timeout);
+    //returns number of RXed chars
+    uint16_t (*handle_rx)(char* buffer,uint16_t buf_len, uint16_t timeout);
+    uint8_t (*handle_set_gpio_led)((uint8_t state);
+    uint8_t (*handle_set_gpio_pwr)((uint8_t state);
+    uint8_t (*handle_delay_ms)(uint16_t time_ms);
 
     //internal buffers
     char rx_buf[RX_BUF_SIZE];
@@ -56,6 +58,8 @@ void sim800_flush(sim800_t *sim800){
     memset(sim800->rx_buf,0x00,sim800->buf_len);
 }
 
+
+
 /***
  * Should be called on the sim800 struct at the beginning
  **/
@@ -64,14 +68,14 @@ uint8_t sim800_init(sim800_t *sim800){
     sim800->credentials_APN = "internet";
     sim800->credentials_user = "";
     sim800->credentials_passwd = "";
-
+    /*
     //Please let me go back to python :(
     sim800->handle_tx = 0;
     sim800->handle_rx = 0;
     sim800->handle_set_gpio_led = 0;
     sim800->handle_set_gpio_pwr = 0;
     sim800->handle_delay_ms = 0;
-
+    */
     sim800->buf_len=RX_BUF_SIZE;
     sim800_flush(sim800);
 }
@@ -152,6 +156,35 @@ uint8_t sim800_query(
 
     return sim800_receive_match_pattern(sim800, 1000,success_pattern);
 }
+
+void sim800_power_pulse(sim800_t *sim800){
+    sim800->handle_set_gpio_pwr(1);
+    sim800->handle_delay_ms(500);
+    sim800->handle_set_gpio_pwr(0);
+}
+
+uint8_t sim800_turn_on(sim800_t *sim800){
+    int i;
+    for (i=0;i<3;i++){
+        if (sim800_query(sim800,"AT","OK")==0x01)
+            return 0x01;//modem is on - quit
+        else
+            sim800_power_pulse(sim800);
+    }
+    return 0x00;
+}
+
+uint8_t sim800_turn_off(sim800_t *sim800){
+    int i;
+    for (i=0;i<3;i++){
+        if (sim800_query(sim800,"AT","OK")==0x00)
+            return 0x01;//modem is not responding - assume it's off and quit
+        else
+            sim800_power_pulse(sim800);
+    }
+    return 0x00;
+}
+
 
 sim800_state_t sim800_get_state(sim800_t *sim800){
     if (sim800_query(sim800,"AT","OK")!=0x01)
