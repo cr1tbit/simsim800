@@ -12,7 +12,7 @@
 #include <errno.h>   /* Error number definitions */
 #include <termios.h> /* POSIX terminal control definitions */
 
-#define GENERIC_SWEAR "screwup"
+#define EMPLOYER_FRIENDLY_PHRASE "screwup"
 
 
 int fail_handle(){
@@ -53,7 +53,7 @@ void uart_tx(char* buffer,uint16_t len, uint16_t timeout){
         printf("Q: %s\n",buffer);
     //#endif
     if (write(fd, buffer, len) < len)
-        printf("possible "GENERIC_SWEAR" writing to port.\n");
+        printf("possible "EMPLOYER_FRIENDLY_PHRASE" writing to port.\n");
 };
 void uart_rx(char* buffer,uint16_t len, uint16_t timeout){
     #ifdef MOCK_UART_DEBUG
@@ -62,7 +62,7 @@ void uart_rx(char* buffer,uint16_t len, uint16_t timeout){
     usleep(1000000);
     int _bno = read(fd, buffer,len); 
     if (_bno <=0)
-        printf("possible "GENERIC_SWEAR" reading from port.\n");
+        printf("possible "EMPLOYER_FRIENDLY_PHRASE" reading from port.\n");
     #ifdef MOCK_UART_DEBUG
         printf("RXed %d bytes: \n%s\n",_bno,buffer);
     #endif
@@ -77,13 +77,14 @@ int test_real_uart(sim800_t *sim){
     return 0;
 }
 
-void send_data(sim800_t *sim){
+uint8_t send_data(sim800_t *sim){
     char *addr = "http://qrng.anu.edu.au/API/jsonI.php?length=1&type=uint8";
     
-    sim800_gprs_get(
+    return sim800_gprs_get(
         sim,
         addr,
-        strlen(addr)
+        strlen(addr),
+        "\"success\""
     );
 }
 
@@ -96,19 +97,21 @@ int main( int argc, const char* argv[] )
 
     fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
     if (fd == -1){
-        printf(GENERIC_SWEAR" opening port.");
+        printf(EMPLOYER_FRIENDLY_PHRASE" opening port.");
         return -1;
     }
     sim.handle_tx = &uart_tx;
     sim.handle_rx = &uart_rx;
     int i;
 
-    for (i=0;i<3;i++){
+
+    for (i=0;i<5;i++){
         if (sim800_get_state(&sim) == 5){
             printf("Valid state detected, doing the send thing...");
-            send_data(&sim);
-            break;
+            if (send_data(&sim)==0x01)
+                break;
         }
+        usleep(3000000);
     }
     //sim800_command(&sim,"AT+CSTT=\"%s\"",sim.credentials_APN);
 }
