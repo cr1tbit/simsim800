@@ -1,7 +1,8 @@
 # simsim800
 Simple SIM800 library to send stuff via GPRS
 
-Not tested on actual MCU yet! Just using mock_main.c on local machine.
+Not usefull at all yet! Just hacked together some code because I really need to get 
+my current project over with.
 
 ## The idea
 This library is meant to be simple and portable. I personally don't really need 
