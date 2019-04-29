@@ -18,11 +18,13 @@ For more info I suggest checking this [link.](https://m2msupport.net/m2msupport/
 **Implement** and then **attach** your own variants of these functions (just like in mock_main.c):
 
 ```
-void (*handle_tx)(char* buffer,uint16_t buf_len, uint16_t timeout);
-void (*handle_rx)(char* buffer,uint16_t buf_len, uint16_t timeout);
-void (*handle_set_gpio_led)(uint8_t state); 
-void (*handle_set_gpio_pwr)(uint8_t state);
-void (*handle_delay_ms)(uint16_t time_ms);
+//returns number of TXed chars
+uint16_t (*handle_tx)(char* buffer,uint16_t buf_len, uint16_t timeout);
+//returns number of RXed chars
+uint16_t (*handle_rx)(char* buffer,uint16_t buf_len, uint16_t timeout);
+uint8_t (*handle_set_gpio_led)((uint8_t state);
+uint8_t (*handle_set_gpio_pwr)((uint8_t state);
+uint8_t (*handle_delay_ms)(uint16_t time_ms);
 ```
 and the library (in theory) will work just fine
 
