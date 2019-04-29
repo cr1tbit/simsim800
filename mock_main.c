@@ -3,7 +3,7 @@
 //void mock_tx(char*,uint16_t, uint16_t);
 //void mock_rx(char*,uint16_t, uint16_t);
 
-#include "sim800.c"
+#include "simsim800.c"
 #include <stdio.h>
 
 #include <string.h>  /* String function definitions */
