@@ -22,10 +22,10 @@ int fail_handle(){
 
 /**** mock-based testing ****/
 
-void mock_tx(char* buffer,uint16_t len, uint16_t timeout){
+uint16_t mock_tx(char* buffer,uint16_t len, uint16_t timeout){
     printf("TX order: %s\n",buffer);
 };
-void mock_rx(char* buffer,uint16_t len, uint16_t timeout){
+uint16_t mock_rx(char* buffer,uint16_t len, uint16_t timeout){
     printf("putting mock OK in buffer\n");
     snprintf(buffer,128,"OK");
 }
@@ -48,24 +48,28 @@ int fd;
 
 //#define MOCK_UART_DEBUG
 
-void uart_tx(char* buffer,uint16_t len, uint16_t timeout){
+uint16_t uart_tx(char* buffer,uint16_t len, uint16_t timeout){
     //#ifdef MOCK_UART_DEBUG
         printf("Q: %s\n",buffer);
     //#endif
     if (write(fd, buffer, len) < len)
         printf("possible "EMPLOYER_FRIENDLY_PHRASE" writing to port.\n");
 };
-void uart_rx(char* buffer,uint16_t len, uint16_t timeout){
+uint16_t uart_rx(char* buffer,uint16_t len, uint16_t timeout){
     #ifdef MOCK_UART_DEBUG
         printf("RXing started...\n");
     #endif
-    usleep(1000000);
+    usleep(timeout*1000);
     int _bno = read(fd, buffer,len); 
     if (_bno <=0)
         printf("possible "EMPLOYER_FRIENDLY_PHRASE" reading from port.\n");
     #ifdef MOCK_UART_DEBUG
         printf("RXed %d bytes: \n%s\n",_bno,buffer);
     #endif
+}
+
+uint8_t unix_delay_ms(uint16_t time_ms){
+    usleep(time_ms*1000);
 }
 
 int test_real_uart(sim800_t *sim){
@@ -102,6 +106,7 @@ int main( int argc, const char* argv[] )
     }
     sim.handle_tx = &uart_tx;
     sim.handle_rx = &uart_rx;
+    sim.handle_delay_ms = &unix_delay_ms;
     int i;
 
 

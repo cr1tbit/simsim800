@@ -24,13 +24,13 @@ typedef struct {
 
     //these pointers must  be populated before
     //actually using the object
-    void (*handle_tx)(char*,uint16_t, uint16_t);
-    void (*handle_rx)(char*,uint16_t, uint16_t);
+    uint16_t (*handle_tx)(char*,uint16_t, uint16_t);
+    uint16_t (*handle_rx)(char*,uint16_t, uint16_t);
 
     //these aren't implemented yet so not really i guess
-    void (*handle_set_gpio_led)(uint8_t);
-    void (*handle_set_gpio_pwr)(uint8_t);
-    void (*handle_delay_ms)(uint16_t);
+    uint8_t (*handle_set_gpio_led)(uint8_t);
+    uint8_t (*handle_set_gpio_pwr)(uint8_t);
+    uint8_t (*handle_delay_ms)(uint16_t);
 
     //internal buffers
     char rx_buf[RX_BUF_SIZE];
@@ -181,17 +181,17 @@ uint8_t sim800_gprs_get(
     char *succ_pattern
 ){
     sim800_query(sim800,"AT+SAPBR=3,1,\"APN\",\"internet\"","OK");
-    sim800_query(sim800,"AT+SAPBR=1,1","OK");
-    sim800_query(sim800,"AT+HTTPINIT","OK");
+    sim800_query(sim800,"AT+SAPBR=1,1","");
+    sim800_query(sim800,"AT+HTTPINIT","");
     sim800_command(
         sim800,
         "AT+HTTPPARA=\"URL\",\"%s\"",
         rx_buf
         );
-    usleep(1000000);
+    sim800->handle_delay_ms(1000);
     sim800_query(sim800,"AT+HTTPACTION=0","OK");
     sim800_flush(sim800);
-    usleep(8000000);
+    sim800->handle_delay_ms(8000);
     if (sim800_query(sim800,"AT+HTTPREAD",succ_pattern) != 0x01){
         return 0x00;
     }
