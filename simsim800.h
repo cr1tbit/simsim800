@@ -6,7 +6,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#define RX_BUF_SIZE 128
+#define RX_BUF_SIZE 256
 
 
 typedef enum {
@@ -37,6 +37,7 @@ typedef struct {
     uint8_t (*handle_set_gpio_led)(uint8_t state);
     uint8_t (*handle_set_gpio_pwr)(uint8_t state);
     uint8_t (*handle_delay_ms)(uint16_t time_ms);
+    void (*handle_flush)();
 
     //internal buffers
     char rx_buf[RX_BUF_SIZE];

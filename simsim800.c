@@ -23,6 +23,7 @@ void sim800_flush(sim800_t *sim800){
             0xFFFF
         );
     }
+    sim800->handle_flush();
     memset(sim800->rx_buf,0x00,sim800->buf_len);
 }
 
@@ -98,11 +99,11 @@ void sim800_receive(
 ){
     sim800->handle_rx(
         sim800->rx_buf,
-        sim800->buf_len,
+        sim800->buf_len-1,
         1000
     );
     sim800->rx_buf[(sim800->buf_len)-1] = 0x00;
-    printf("R:%s\n",sim800->rx_buf);
+    //printf("R:%s\n",sim800->rx_buf);
 }
 
 uint8_t sim800_receive_match_pattern(
@@ -184,19 +185,28 @@ uint8_t sim800_gprs_get(
     sim800_query(sim800,"AT+SAPBR=3,1,\"APN\",\"internet\"","OK");
     sim800_query(sim800,"AT+SAPBR=1,1","");
     sim800_query(sim800,"AT+HTTPINIT","");
+    /*sim800_query(
+        sim800,
+        "AT+HTTPPARA=\"URL\",\"http://shitposting.technology:3334/?d=1\"",
+        "");
+        */
+    sim800_query(sim800,"AT","");
+
     sim800_command(
         sim800,
         "AT+HTTPPARA=\"URL\",\"%s\"",
         rx_buf
         );
     sim800->handle_delay_ms(1000);
-    sim800_query(sim800,"AT+HTTPACTION=0","OK");
     sim800_flush(sim800);
-    sim800->handle_delay_ms(8000);
+    sim800_query(sim800,"AT+HTTPACTION=0","");
+    sim800->handle_delay_ms(5000);
+    
+
     if (sim800_query(sim800,"AT+HTTPREAD",succ_pattern) != 0x01){
         return 0x00;
     }
-    printf("\n***rx_buf CONENT ***\n%s\n",sim800->rx_buf);
+    //printf("\n***rx_buf CONENT ***\n%s\n",sim800->rx_buf);
     sim800_query(sim800,"AT+CIPSHUT","OK");
     return 0x01;
 }
