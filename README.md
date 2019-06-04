@@ -1,8 +1,8 @@
 # simsim800
 Simple SIM800 library to send stuff via GPRS
 
-Not usefull at all yet! Just hacked together some code because I really need to get 
-my current project over with.
+Barely usefull at all yet! Just hacked together some code because I really need to get 
+my current project over with. But it works fine for me.
 
 ## The idea
 This library is meant to be simple and portable. I personally don't really need 
@@ -25,8 +25,13 @@ uint16_t (*handle_rx)(char* buffer,uint16_t buf_len, uint16_t timeout);
 uint8_t (*handle_set_gpio_led)((uint8_t state);
 uint8_t (*handle_set_gpio_pwr)((uint8_t state);
 uint8_t (*handle_delay_ms)(uint16_t time_ms);
+//may be passed stub function on some UART implementations
+void (*handle_flush)(); 
 ```
 and the library (in theory) will work just fine
 
 ## Work = in progress 
 Please don't use it yet but feel free to feel inspired.
+
+In order for this lib to make sense, the handlers magic should be rewritten into
+a lot of #DEFINE magic. One day.
