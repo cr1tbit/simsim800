@@ -17,7 +17,7 @@ For more info I suggest checking this [link.](https://m2msupport.net/m2msupport/
 ## How do I
 **Implement** and then **attach** your own variants of these functions (just like in mock_main.c):
 
-```
+```C
 //returns number of TXed chars
 uint16_t (*handle_tx)(char* buffer,uint16_t buf_len, uint16_t timeout);
 //returns number of RXed chars
@@ -33,7 +33,7 @@ and the library (in theory) will work just fine
 ## Example snippet from my actual project
 This code was deployed on STM32 Mcu with freeRTOS.
 
-```
+```C
 //Functions below utulize STM32CubeHal's uart methods.
 uint16_t gsm_handle_rx(char* buffer,uint16_t len, uint16_t timeout){
   volatile uint16_t rx_test = 
